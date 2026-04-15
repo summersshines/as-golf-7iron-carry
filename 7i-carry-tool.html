@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7 Iron Carry Benchmark — Anthony Summers Golf</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif; background: #f5f5f0; min-height: 100vh; padding: 1.5rem; }
+  .container { max-width: 620px; margin: 0 auto; }
+  .header { background: #1a3a2a; border-radius: 12px 12px 0 0; padding: 1.75rem 2rem; position: relative; overflow: hidden; }
+  .header-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #BA7517, #EF9F27, #FAC775, #EF9F27, #BA7517); }
+  .brand { color: #EF9F27; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.75rem; }
+  .header h1 { color: #ffffff; font-size: 24px; font-weight: normal; font-family: Georgia, serif; line-height: 1.2; margin-bottom: 6px; }
+  .header p { color: #9FE1CB; font-size: 13px; font-style: italic; font-family: Georgia, serif; }
+  .body { background: #ffffff; border: 0.5px solid #e8e8e8; border-top: none; padding: 1.5rem 2rem; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+  .control-group { display: flex; flex-direction: column; gap: 5px; }
+  .control-group label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; }
+  select, input[type="number"] { font-size: 13px; padding: 8px 10px; border-radius: 8px; border: 1px solid #ddd; background: #fafafa; color: #1a1a1a; width: 100%; }
+  select:focus, input:focus { outline: none; border-color: #1D9E75; }
+  input[type="number"] { text-align: center; font-size: 18px; font-family: Georgia, serif; font-weight: 500; }
+  input[type="number"].below { border-color: #EF9F27; background: #fffdf8; color: #854F0B; }
+  input[type="number"].within { border-color: #97C459; background: #EAF3DE; color: #3B6D11; }
+  input[type="number"].above { border-color: #1D9E75; background: #EAF3DE; color: #3B6D11; }
+  .result-card { border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1.25rem; border: 1px solid #e8e8e8; }
+  .result-card.neutral { background: #f8f8f5; }
+  .result-card.below { background: #FAEEDA; border-color: #EF9F27; }
+  .result-card.within { background: #EAF3DE; border-color: #97C459; }
+  .result-card.above { background: #EAF3DE; border-color: #1D9E75; }
+  .result-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; flex-wrap: wrap; gap: 8px; }
+  .result-label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.07em; }
+  .result-range { font-size: 32px; font-weight: 500; font-family: Georgia, serif; color: #1a1a1a; line-height: 1; }
+  .result-range.below { color: #854F0B; }
+  .result-range.within { color: #3B6D11; }
+  .result-range.above { color: #3B6D11; }
+  .result-badge { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+  .badge-neutral { background: #e8e8e8; color: #666; }
+  .badge-below { background: #EF9F27; color: #412402; }
+  .badge-within { background: #1D9E75; color: #ffffff; }
+  .badge-above { background: #1a3a2a; color: #9FE1CB; }
+  .result-bar { height: 8px; background: #e8e8e8; border-radius: 4px; margin-bottom: 10px; position: relative; overflow: visible; }
+  .bar-fill { height: 100%; border-radius: 4px; background: #C0DD97; }
+  .bar-marker { position: absolute; top: -4px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid white; transform: translateX(-50%); }
+  .insight { border-left: 3px solid #EF9F27; background: #fffdf8; border-radius: 0 8px 8px 0; padding: 12px 16px; margin-bottom: 1.25rem; font-size: 13px; color: #633806; line-height: 1.7; }
+  .insight strong { color: #854F0B; }
+  .divider { display: flex; align-items: center; gap: 10px; margin: 1.25rem 0 1rem; }
+  .divider .ln { flex: 1; height: 0.5px; background: #e8e8e8; }
+  .divider span { font-size: 10px; font-weight: 600; color: #aaa; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; }
+  .grid-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .grid-table th { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; padding: 5px 6px; text-align: center; border-bottom: 0.5px solid #e8e8e8; }
+  .grid-table th:first-child { text-align: left; }
+  .grid-table td { padding: 6px 6px; text-align: center; border-bottom: 0.5px solid #f0f0f0; color: #555; font-size: 11px; }
+  .grid-table td:first-child { text-align: left; color: #888; font-weight: 600; }
+  .grid-table tr:last-child td { border-bottom: none; }
+  .grid-table td.selected-cell { background: #EAF3DE; color: #3B6D11; font-weight: 600; border-radius: 4px; }
+  .grid-table td.selected-cell.below-range { background: #FAEEDA; color: #854F0B; }
+  .grid-table td.selected-cell.above-range { background: #EAF3DE; color: #1a3a2a; font-weight: 700; }
+  .cta { background: #1a3a2a; border-radius: 8px; padding: 1rem 1.25rem; margin-top: 1.25rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+  .cta-left p { color: #9FE1CB; font-size: 14px; font-style: italic; font-family: Georgia, serif; margin-bottom: 4px; }
+  .cta-left span { color: #5DCAA5; font-size: 11px; }
+  .cta-right { text-align: right; }
+  .cta-right p { color: #EF9F27; font-size: 12px; font-weight: 600; }
+  .cta-right span { color: #9FE1CB; font-size: 11px; display: block; margin-top: 2px; }
+  .footer { background: #0F6E56; border-radius: 0 0 12px 12px; padding: 0.875rem 2rem; border: 0.5px solid #e8e8e8; border-top: none; }
+  .footer p { color: #E1F5EE; font-size: 11px; line-height: 1.8; }
+  @media (max-width: 480px) { body { padding: 0.75rem; } .controls { grid-template-columns: 1fr 1fr; } .body { padding: 1.25rem 1rem; } }
+  @media print { body { background: white; padding: 0; } * { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-bar"></div>
+    <div class="brand">Anthony Summers Golf</div>
+    <h1>7 Iron Carry Benchmark</h1>
+    <p>How does your ball striking compare for your age and handicap?</p>
+  </div>
+
+  <div class="body">
+    <div class="controls">
+      <div class="control-group">
+        <label>Age group</label>
+        <select id="age" onchange="update()">
+          <option value="0">20s</option>
+          <option value="1">30s</option>
+          <option value="2" selected>40s</option>
+          <option value="3">50s</option>
+          <option value="4">60s</option>
+          <option value="5">70+</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Handicap</label>
+        <select id="hdcp" onchange="update()">
+          <option value="0">0 – 5</option>
+          <option value="1">6 – 10</option>
+          <option value="2" selected>11 – 15</option>
+          <option value="3">16 – 20</option>
+          <option value="4">21 – 25</option>
+          <option value="5">26+</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label>Your carry (m)</label>
+        <input type="number" id="carry" placeholder="e.g. 135" min="50" max="200" oninput="update()" />
+      </div>
+    </div>
+
+    <div id="result-card" class="result-card neutral">
+      <div class="result-top">
+        <div>
+          <div class="result-label">Benchmark range</div>
+          <div id="range-display" class="result-range">— m</div>
+        </div>
+        <div id="badge"></div>
+      </div>
+      <div id="bar-wrap" class="result-bar" style="display:none;">
+        <div id="bar-fill" class="bar-fill"></div>
+        <div id="bar-marker" class="bar-marker"></div>
+      </div>
+      <div id="range-sub" style="font-size:11px;color:#999;"></div>
+    </div>
+
+    <div id="insight" class="insight">
+      <p>Enter the player's age, handicap and 7 iron carry distance to see how their ball striking compares.</p>
+    </div>
+
+    <div class="divider"><div class="ln"></div><span>Full benchmark table</span><div class="ln"></div></div>
+
+    <div id="grid-wrap"></div>
+
+    <div class="cta">
+      <div class="cta-left">
+        <p>Your short game is where your handicap is hiding.</p>
+        <span>Contact Anthony to find out more</span>
+      </div>
+      <div class="cta-right">
+        <p>0409 517 867</p>
+        <span>summersshines@gmail.com</span>
+        <span>Score Better program — ask for details</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>Data: industry benchmarks from multiple sources &nbsp;·&nbsp; PGA golf coach &nbsp;·&nbsp; 2014 Qld PGA Champion &nbsp;·&nbsp; 2020 Victorian Senior PGA Champion &nbsp;·&nbsp; 2012 US Open &nbsp;·&nbsp; Golf NSW High Performance Program</p>
+  </div>
+
+</div>
+
+<script>
+const AGES = ['20s','30s','40s','50s','60s','70+'];
+const HDCPS = ['0–5','6–10','11–15','16–20','21–25','26+'];
+const DATA = [
+  [[150,160],[145,155],[135,145],[125,135],[120,130],[110,125]],
+  [[145,155],[140,150],[130,140],[120,130],[115,125],[105,120]],
+  [[140,150],[135,145],[125,135],[115,125],[110,120],[100,115]],
+  [[135,145],[130,140],[120,130],[110,120],[105,115],[95,110]],
+  [[125,135],[125,135],[115,125],[105,115],[95,110],[85,100]],
+  [[120,130],[115,125],[105,120],[95,105],[85,100],[75,90]]
+];
+
+function update() {
+  const ai = parseInt(document.getElementById('age').value);
+  const hi = parseInt(document.getElementById('hdcp').value);
+  const carryVal = document.getElementById('carry').value;
+  const carry = carryVal !== '' ? parseInt(carryVal) : null;
+  const [lo, hi2] = DATA[ai][hi];
+  const mid = Math.round((lo + hi2) / 2);
+  const ageLabel = AGES[ai];
+  const hdcpLabel = HDCPS[hi];
+
+  const rangeDisplay = document.getElementById('range-display');
+  const badge = document.getElementById('badge');
+  const resultCard = document.getElementById('result-card');
+  const barWrap = document.getElementById('bar-wrap');
+  const barFill = document.getElementById('bar-fill');
+  const barMarker = document.getElementById('bar-marker');
+  const rangeSub = document.getElementById('range-sub');
+  const insightEl = document.getElementById('insight');
+  const carryInput = document.getElementById('carry');
+
+  rangeDisplay.textContent = `${lo}–${hi2}m`;
+  rangeSub.textContent = `${ageLabel} · ${hdcpLabel} handicap · industry benchmark`;
+
+  if (carry === null || carryVal === '') {
+    resultCard.className = 'result-card neutral';
+    rangeDisplay.className = 'result-range';
+    badge.innerHTML = '<span class="result-badge badge-neutral">Enter carry distance</span>';
+    barWrap.style.display = 'none';
+    carryInput.className = '';
+    insightEl.innerHTML = '<p>Enter the player\'s 7 iron carry distance to see how their ball striking compares to the benchmark for their age and handicap.</p>';
+    renderGrid(ai, hi, null, null);
+    return;
+  }
+
+  let status, cardClass, badgeClass, badgeText, rangeClass, markerColor;
+  const bufferLo = lo - 5;
+  const bufferHi = hi2 + 5;
+
+  if (carry < lo) {
+    status = 'below';
+    cardClass = 'result-card below';
+    badgeClass = 'result-badge badge-below';
+    badgeText = 'Below benchmark';
+    rangeClass = 'result-range below';
+    markerColor = '#EF9F27';
+    carryInput.className = 'below';
+  } else if (carry > hi2) {
+    status = 'above';
+    cardClass = 'result-card above';
+    badgeClass = 'result-badge badge-above';
+    badgeText = 'Above benchmark';
+    rangeClass = 'result-range above';
+    markerColor = '#1a3a2a';
+    carryInput.className = 'above';
+  } else {
+    status = 'within';
+    cardClass = 'result-card within';
+    badgeClass = 'result-badge badge-within';
+    badgeText = 'Within benchmark';
+    rangeClass = 'result-range within';
+    markerColor = '#1D9E75';
+    carryInput.className = 'within';
+  }
+
+  resultCard.className = cardClass;
+  rangeDisplay.className = rangeClass;
+  badge.innerHTML = `<span class="result-badge ${badgeClass}">${badgeText}</span>`;
+
+  const barMin = bufferLo - 10;
+  const barMax = bufferHi + 10;
+  const rangeWidth = ((hi2 - lo) / (barMax - barMin)) * 100;
+  const rangeLeft = ((lo - barMin) / (barMax - barMin)) * 100;
+  const markerLeft = Math.min(Math.max(((carry - barMin) / (barMax - barMin)) * 100, 0), 100);
+
+  barWrap.style.display = 'block';
+  barFill.style.width = rangeWidth + '%';
+  barFill.style.marginLeft = rangeLeft + '%';
+  barFill.style.background = status === 'below' ? '#FAC775' : status === 'above' ? '#1D9E75' : '#97C459';
+  barMarker.style.left = markerLeft + '%';
+  barMarker.style.background = markerColor;
+
+  const gap = carry < lo ? lo - carry : carry > hi2 ? carry - hi2 : 0;
+
+  let insight = '';
+  if (status === 'below') {
+    if (gap <= 5) insight = `<strong>Just ${gap}m short of the benchmark range.</strong> That's well within normal variation on any given day. Ball striking is not a significant limiting factor here — the scoring opportunity lies inside 100m. Your short game is where your handicap is hiding.`;
+    else if (gap <= 15) insight = `<strong>${carry}m carry is ${gap}m below the ${lo}–${hi2}m benchmark</strong> for a ${ageLabel} golfer playing off ${hdcpLabel}. There's some distance available through better ball striking — but even closing this gap won't move the handicap as much as improving the short game. Your short game is where your handicap is hiding.`;
+    else insight = `<strong>${carry}m carry is ${gap}m below the benchmark range.</strong> Ball striking is a genuine factor here and worth working on. However short game improvement will still deliver faster scoring results. Both matter — but the short game payoff comes first. Your short game is where your handicap is hiding.`;
+  } else if (status === 'above') {
+    insight = `<strong>${carry}m carry is ${gap}m above the benchmark range</strong> for a ${ageLabel} golfer playing off ${hdcpLabel}. Ball striking is clearly not the limiting factor. The scoring difference between this player and better handicaps is being decided entirely inside 100m. Your short game is where your handicap is hiding.`;
+  } else {
+    const pos = carry <= mid ? 'lower half' : 'upper half';
+    insight = `<strong>${carry}m carry sits in the ${pos} of the ${lo}–${hi2}m benchmark range</strong> for a ${ageLabel} golfer playing off ${hdcpLabel}. Ball striking is right where it should be — this is not where the shots are going. The scoring opportunity lies inside 100m. Your short game is where your handicap is hiding.`;
+  }
+
+  insightEl.innerHTML = `<p>${insight}</p>`;
+  renderGrid(ai, hi, carry, status);
+}
+
+function renderGrid(selectedAge, selectedHdcp, carry, status) {
+  let html = '<table class="grid-table"><thead><tr><th>Age</th>';
+  HDCPS.forEach(h => { html += `<th>${h}</th>`; });
+  html += '</tr></thead><tbody>';
+  DATA.forEach((row, ai) => {
+    html += `<tr><td>${AGES[ai]}</td>`;
+    row.forEach(([lo, hi2], hi) => {
+      let cls = '';
+      if (ai === selectedAge && hi === selectedHdcp) {
+        cls = status === 'below' ? 'selected-cell below-range' : status === 'above' ? 'selected-cell above-range' : 'selected-cell';
+      }
+      html += `<td class="${cls}">${lo}–${hi2}</td>`;
+    });
+    html += '</tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('grid-wrap').innerHTML = html;
+}
+
+update();
+</script>
+</body>
+</html>
